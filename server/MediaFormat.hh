@@ -22,14 +22,6 @@
 #ifndef _MEDIA_FORMAT_HH
 #define _MEDIA_FORMAT_HH
 
-enum VideoFormat {
-  VFMT_NONE,
-  VFMT_MJPEG,
-  VFMT_MPEG1,
-  VFMT_MPEG2,
-  VFMT_MPEG4
-};
-
 enum AudioFormat {
   AFMT_NONE,
   AFMT_PCM_RAW16,

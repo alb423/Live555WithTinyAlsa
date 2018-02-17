@@ -29,7 +29,6 @@ class WISInput: public Medium {
 public:
   static WISInput* createNew(UsageEnvironment& env);
 
-  FramedSource* videoSource();
   FramedSource* audioSource();
 
 private:
@@ -39,15 +38,10 @@ private:
   static Boolean initialize(UsageEnvironment& env);
   static Boolean openFiles(UsageEnvironment& env);
   static Boolean initALSA(UsageEnvironment& env);
-  static Boolean initV4L(UsageEnvironment& env);
-  static void listVideoInputDevices(UsageEnvironment& env);
 
 private:
-  friend class WISVideoOpenFileSource;
   friend class WISAudioOpenFileSource;
   static Boolean fHaveInitialized;
-  static int fOurVideoFileNo;
-  static FramedSource* fOurVideoSource;
   static int fOurAudioFileNo;
   static FramedSource* fOurAudioSource;
   static struct pcm* fOurPCMDevice;
@@ -57,8 +51,6 @@ private:
 // Functions to set the optimal buffer size for RTP sink objects.
 // These should be called before each RTPSink is created.
 #define AUDIO_MAX_FRAME_SIZE 20480
-#define VIDEO_MAX_FRAME_SIZE 250000
 inline void setAudioRTPSinkBufferSize() { OutPacketBuffer::maxSize = AUDIO_MAX_FRAME_SIZE; }
-inline void setVideoRTPSinkBufferSize() { OutPacketBuffer::maxSize = VIDEO_MAX_FRAME_SIZE; }
 
 #endif

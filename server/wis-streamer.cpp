@@ -25,7 +25,7 @@
 #include "Options.hh"
 
 // =====================================
-// Extract from options.cpp in wis-streamer project, extract start 
+// Extract from options.cpp in wis-streamer project, extract start
 #include <GroupsockHelper.hh>
 // Initialize option variables to default values:
 portNumBits rtspServerPortNum = 8554;

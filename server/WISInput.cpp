@@ -95,6 +95,8 @@ WISInput::WISInput(UsageEnvironment& env)
 
 WISInput::~WISInput()
 {
+    struct pcm *pPcm = fOurPCMDevice;
+    pcm_close(pPcm);
 }
 
 Boolean WISInput::initialize(UsageEnvironment& env)
@@ -119,18 +121,23 @@ Boolean WISInput::openFiles(UsageEnvironment& env)
         config.channels = audioNumChannels; //2;
         config.rate = audioSamplingFrequency; //48000;
         config.period_size = 1024;
-        config.period_count = 2; //2
-		if(audioFormat == AFMT_PCM_RAW16) {
-			// live555 audio format to tinyalsa format 
-			config.format = PCM_FORMAT_S16_LE;
-		}
-        config.start_threshold = 0;
-        config.stop_threshold = 0;
-        config.silence_threshold = 0;
+        config.period_count = 2;
+        if (audioFormat == AFMT_PCM_RAW16) {
+            // live555 audio format to tinyalsa format
+            config.format = PCM_FORMAT_S16_LE;
+        }
+        config.start_threshold = 1024;
+        config.stop_threshold = 1024 * 2;
+        config.silence_threshold = 1024 * 2;
 
         pPcm = pcm_open(0, 0, PCM_IN, &config);
-        if (!pPcm || !pcm_is_ready(pPcm)) {
+        if (!pPcm) {
+            fprintf(stderr, "failed to allocate memory for pcm (%s)\n", pcm_get_error(pPcm));
+            return 0;
+        }
+        if (!pcm_is_ready(pPcm)) {
             fprintf(stderr, "Unable to open PCM device (%s)\n", pcm_get_error(pPcm));
+            pcm_close(pPcm);
             return 0;
         }
 
@@ -208,15 +215,14 @@ WISAudioOpenFileSource::~WISAudioOpenFileSource()
 void WISAudioOpenFileSource::readFromFile()
 {
     // Read available audio data:
-
     struct pcm *pPcm = fInput.fOurPCMDevice;
     int timeinc;
 
-    int read_count  = pcm_readi(pPcm, fTo, fMaxSize);
+    //int read_count  = pcm_readi(pPcm, fTo, fMaxSize);   // fMaxSize=21828
+    int read_count  = pcm_readi(pPcm, fTo, 4096);
     if (read_count  < 0) read_count  = 0;
 
-	fFrameSize = pcm_frames_to_bytes(pPcm, read_count );
-    //fFrameSize = (unsigned)read_count  * 4;  // channels * bytesOfSample
+    fFrameSize = pcm_frames_to_bytes(pPcm, read_count);
     gettimeofday(&fPresentationTime, NULL);
 
     /* PR#2665 fix from Robin
